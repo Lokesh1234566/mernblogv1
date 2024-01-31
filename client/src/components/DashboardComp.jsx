@@ -6,6 +6,7 @@ import {
   HiDocumentText,
   HiOutlineUserGroup,
 } from "react-icons/hi";
+import { FaThumbsUp } from "react-icons/fa";
 import { Button, Table } from "flowbite-react";
 import { Link } from "react-router-dom";
 
@@ -16,6 +17,7 @@ export default function DashboardComp() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
+  const [totalCommentsLikes, setTotalCommentslikes] = useState(0);
   const [lastMonthUsers, setLastMonthUsers] = useState(0);
   const [lastMonthPosts, setLastMonthPosts] = useState(0);
   const [lastMonthComments, setLastMonthComments] = useState(0);
@@ -51,10 +53,13 @@ export default function DashboardComp() {
       try {
         const res = await fetch("/api/comment/getcomments?limit=5");
         const data = await res.json();
+
         if (res.ok) {
           setComments(data.comments);
           setTotalComments(data.totalComments);
           setLastMonthComments(data.lastMonthComments);
+          // setTotalCommentslikes(Math.floor(Math.random() * 10) + 1);
+          setTotalCommentslikes(data.totalNumberOfLIkes);
         }
       } catch (error) {
         console.log(error.message);
@@ -95,12 +100,24 @@ export default function DashboardComp() {
             </div>
             <HiAnnotation className="bg-indigo-600  text-white rounded-full text-5xl p-3 shadow-lg" />
           </div>
+
           <div className="flex  gap-2 text-sm">
             <span className="text-green-500 flex items-center">
               <HiArrowNarrowUp />
               {lastMonthComments}
             </span>
             <div className="text-gray-500">Last month</div>
+          </div>
+        </div>
+        <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
+          <div className="flex justify-between">
+            <div className="">
+              <h3 className="text-gray-500 text-md uppercase">
+                Total Comments Likes
+              </h3>
+              <p className="text-2xl">{totalCommentsLikes}</p>
+            </div>
+            <FaThumbsUp className="bg-indigo-500  text-white rounded-full text-5xl p-3 shadow-lg" />
           </div>
         </div>
         <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">

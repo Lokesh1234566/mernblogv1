@@ -110,6 +110,11 @@ export const getcomments = async (req, res, next) => {
       .skip(startIndex)
       .limit(limit);
     const totalComments = await Comment.countDocuments();
+    const totalNumberOfLIkesResult = await Comment.aggregate([
+      { $group: { _id: null, sumValue: { $sum: "$numberOfLikes" } } },
+    ]);
+    const totalNumberOfLIkes = totalNumberOfLIkesResult[0].sumValue;
+    console.log(totalNumberOfLIkes);
     const now = new Date();
     const oneMonthAgo = new Date(
       now.getFullYear(),
@@ -119,7 +124,9 @@ export const getcomments = async (req, res, next) => {
     const lastMonthComments = await Comment.countDocuments({
       createdAt: { $gte: oneMonthAgo },
     });
-    res.status(200).json({ comments, totalComments, lastMonthComments });
+    res
+      .status(200)
+      .json({ comments, totalComments, lastMonthComments, totalNumberOfLIkes });
   } catch (error) {
     next(error);
   }
