@@ -1,5 +1,5 @@
 import Comment from "../models/comment.model.js";
-
+import { errorHandler } from "../utils/error.js";
 export const createComment = async (req, res, next) => {
   try {
     const { content, postId, userId } = req.body;
@@ -40,15 +40,70 @@ export const likeComment = async (req, res, next) => {
     if (!comment) {
       return next(errorHandler(404, "Comment not found"));
     }
-    const userIndex = comment.likes.indexOf(req.user.id);
-    if (userIndex === -1) {
+    await handleLikesComment(true, comment, req.user.id);
+    // const userIndex = comment.likes.indexOf(req.user.id);
+    // if (userIndex === -1) {
+    //   comment.numberOfLikes += 1;
+    //   comment.likes.push(req.user.id);
+    // } else {
+    //   comment.numberOfLikes -= 1;
+    //   comment.likes.splice(userIndex, 1);
+    // }
+    // await comment.save();
+    res.status(200).json(comment);
+  } catch (error) {
+    next(error);
+  }
+};
+
+async function handleLikesComment(isLike, comment, userId) {
+  const userLikeIndex = comment.likes.indexOf(userId);
+  const userDisLikeIndex = comment.disLikes.indexOf(userId);
+  if (isLike) {
+    if (userDisLikeIndex !== -1) {
+      comment.numberOfDisLikes -= 1;
+      comment.disLikes.splice(userDisLikeIndex, 1);
+    }
+    if (userLikeIndex === -1) {
       comment.numberOfLikes += 1;
-      comment.likes.push(req.user.id);
+      comment.likes.push(userId);
     } else {
       comment.numberOfLikes -= 1;
-      comment.likes.splice(userIndex, 1);
+      comment.likes.splice(userLikeIndex, 1);
     }
-    await comment.save();
+  } else {
+    if (userLikeIndex !== -1) {
+      comment.numberOfLikes -= 1;
+      comment.likes.splice(userLikeIndex, 1);
+    }
+    if (userDisLikeIndex === -1) {
+      comment.numberOfDisLikes += 1;
+      comment.disLikes.push(userId);
+    } else {
+      comment.numberOfDisLikes -= 1;
+      comment.disLikes.splice(userDisLikeIndex, 1);
+    }
+  }
+
+  await comment.save();
+}
+
+export const disLikeComment = async (req, res, next) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) {
+      return next(errorHandler(404, "Comment not found"));
+    }
+    await handleLikesComment(false, comment, req.user.id);
+    // const userIndex = comment.disLikes.indexOf(req.user.id);
+    // if (userIndex === -1) {
+    //   comment.numberOfDisLikes += 1;
+    //   comment.disLikes.push(req.user.id);
+    // } else {
+    //   comment.numberOfDisLikes -= 1;
+    //   comment.disLikes.splice(userIndex, 1);
+    // }
+    // await comment.save();
     res.status(200).json(comment);
   } catch (error) {
     next(error);
@@ -110,11 +165,16 @@ export const getcomments = async (req, res, next) => {
       .skip(startIndex)
       .limit(limit);
     const totalComments = await Comment.countDocuments();
-    const totalNumberOfLIkesResult = await Comment.aggregate([
+    const totalNumberOfLikesResult = await Comment.aggregate([
       { $group: { _id: null, sumValue: { $sum: "$numberOfLikes" } } },
     ]);
-    const totalNumberOfLIkes = totalNumberOfLIkesResult[0].sumValue;
-    console.log(totalNumberOfLIkes);
+    const totalNumberOfLikes = totalNumberOfLikesResult[0].sumValue;
+    console.log(totalNumberOfLikes);
+    const totalNumberOfDisLikesResult = await Comment.aggregate([
+      { $group: { _id: null, sumValue: { $sum: "$numberOfDisLikes" } } },
+    ]);
+    const totalNumberOfDisLikes = totalNumberOfDisLikesResult[0].sumValue;
+    console.log(totalNumberOfDisLikes);
     const now = new Date();
     const oneMonthAgo = new Date(
       now.getFullYear(),
@@ -126,7 +186,13 @@ export const getcomments = async (req, res, next) => {
     });
     res
       .status(200)
-      .json({ comments, totalComments, lastMonthComments, totalNumberOfLIkes });
+      .json({
+        comments,
+        totalComments,
+        lastMonthComments,
+        totalNumberOfLikes,
+        totalNumberOfDisLikes,
+      });
   } catch (error) {
     next(error);
   }

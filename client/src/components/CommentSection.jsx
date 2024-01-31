@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Alert, Button, Modal, Textarea } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -72,6 +73,37 @@ export default function CommentSection({ postId }) {
             comment._id === commentId
               ? {
                   ...comment,
+                  likes: data.likes,
+                  numberOfLikes: data.likes.length,
+                  disLikes: data.disLikes,
+                  numberOfDisLikes: data.disLikes.length,
+                }
+              : comment
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  const handleDisLike = async (commentId) => {
+    try {
+      if (!currentUser) {
+        navigate("/sign-in");
+        return;
+      }
+      const res = await fetch(`/api/comment/dislikeComment/${commentId}`, {
+        method: "PUT",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(
+          comments.map((comment) =>
+            comment._id === commentId
+              ? {
+                  ...comment,
+                  disLikes: data.disLikes,
+                  numberOfDisLikes: data.disLikes.length,
                   likes: data.likes,
                   numberOfLikes: data.likes.length,
                 }
@@ -176,6 +208,7 @@ export default function CommentSection({ postId }) {
             <Comment
               key={comment._id}
               comment={comment}
+              onDisLike={handleDisLike}
               onLike={handleLike}
               onEdit={handleEdit}
               onDelete={(commentId) => {

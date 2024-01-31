@@ -6,7 +6,7 @@ import {
   HiDocumentText,
   HiOutlineUserGroup,
 } from "react-icons/hi";
-import { FaThumbsUp } from "react-icons/fa";
+import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { Button, Table } from "flowbite-react";
 import { Link } from "react-router-dom";
 
@@ -18,6 +18,8 @@ export default function DashboardComp() {
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
   const [totalCommentsLikes, setTotalCommentslikes] = useState(0);
+  const [totalCommentsDisLikes, setTotalCommentsDisLikes] = useState(0);
+
   const [lastMonthUsers, setLastMonthUsers] = useState(0);
   const [lastMonthPosts, setLastMonthPosts] = useState(0);
   const [lastMonthComments, setLastMonthComments] = useState(0);
@@ -59,7 +61,8 @@ export default function DashboardComp() {
           setTotalComments(data.totalComments);
           setLastMonthComments(data.lastMonthComments);
           // setTotalCommentslikes(Math.floor(Math.random() * 10) + 1);
-          setTotalCommentslikes(data.totalNumberOfLIkes);
+          setTotalCommentslikes(data.totalNumberOfLikes);
+          setTotalCommentsDisLikes(data.totalNumberOfDisLikes);
         }
       } catch (error) {
         console.log(error.message);
@@ -74,6 +77,7 @@ export default function DashboardComp() {
   return (
     <div className="p-3 md:mx-auto">
       <div className="flex-wrap flex gap-4 justify-center">
+        {/* total user */}
         <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
           <div className="flex justify-between">
             <div className="">
@@ -90,6 +94,7 @@ export default function DashboardComp() {
             <div className="text-gray-500">Last month</div>
           </div>
         </div>
+        {/* total comments */}
         <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
           <div className="flex justify-between">
             <div className="">
@@ -109,17 +114,30 @@ export default function DashboardComp() {
             <div className="text-gray-500">Last month</div>
           </div>
         </div>
+        {/* total comments likes */}
         <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-col">
             <div className="">
               <h3 className="text-gray-500 text-md uppercase">
                 Total Comments Likes
               </h3>
-              <p className="text-2xl">{totalCommentsLikes}</p>
             </div>
-            <FaThumbsUp className="bg-indigo-500  text-white rounded-full text-5xl p-3 shadow-lg" />
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <FaThumbsUp className="bg-indigo-500  text-white rounded-full text-4xl p-3 shadow-lg" />
+                <p className="text-2xl">{totalCommentsLikes}</p>
+              </div>
+              <div
+                className="flex
+               justify-between"
+              >
+                <FaThumbsDown className="bg-red-400  text-white rounded-full text-4xl p-3 shadow-lg" />
+                <p className="text-2xl">{totalCommentsDisLikes}</p>
+              </div>
+            </div>
           </div>
         </div>
+        {/* total posts */}
         <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
           <div className="flex justify-between">
             <div className="">

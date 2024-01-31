@@ -1,10 +1,17 @@
+/* eslint-disable react/prop-types */
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { FaThumbsUp } from "react-icons/fa";
+import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { Button, Textarea } from "flowbite-react";
 
-export default function Comment({ comment, onLike, onEdit, onDelete }) {
+export default function Comment({
+  comment,
+  onLike,
+  onEdit,
+  onDelete,
+  onDisLike,
+}) {
   const [user, setUser] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
@@ -113,6 +120,23 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                   comment.numberOfLikes +
                     " " +
                     (comment.numberOfLikes === 1 ? "like" : "likes")}
+              </p>
+              <button
+                type="button"
+                onClick={() => onDisLike(comment._id)}
+                className={`text-gray-400 hover:text-red-500 ${
+                  currentUser &&
+                  comment.disLikes.includes(currentUser._id) &&
+                  "!text-red-500"
+                }`}
+              >
+                <FaThumbsDown className="text-sm" />
+              </button>
+              <p className="text-gray-400">
+                {comment.numberOfDisLikes > 0 &&
+                  comment.numberOfDisLikes +
+                    " " +
+                    (comment.numberOfDisLikes === 1 ? "Dislike" : "Dislikes")}
               </p>
               {currentUser &&
                 (currentUser._id === comment.userId || currentUser.isAdmin) && (
